@@ -1,0 +1,10 @@
+server:
+  port: 9090
+spring:
+  application:
+    name: demo-admin
+  datasource:
+    url: jdbc:postgresql://localhost:5432/corso
+    username: postgres
+    password: 1234567890
+    driver-class-name: org.postgresql.Driver
