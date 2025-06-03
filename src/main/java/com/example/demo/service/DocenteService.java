@@ -16,7 +16,7 @@ public class DocenteService {
             return null;
         }
         try {
-            String url = "http://localhost:8080/docenti/" + "/" + id_docente;
+            String url = "http://localhost:8080/docenti/" + id_docente;
             return restTemplate.getForObject(url, DocenteDTO.class);
         }  catch (RestClientException e) {
             System.err.println("Errore: " + e.getMessage());
