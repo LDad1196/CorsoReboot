@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.converter.CorsoMapper;
 import com.example.demo.data.DTO.CorsoDTO;
+import com.example.demo.data.DTO.DocenteDTO;
 import com.example.demo.data.entity.Corso;
 import com.example.demo.repository.CorsoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +25,13 @@ public class CorsoService {
     public List<CorsoDTO> findAll() {
         return corsoRepository.findAll()
                 .stream()
-                .map(corsoMapper::toDto)
+                .map(this::convertToDto)
                 .toList();
     }
 
     public CorsoDTO findById(Integer id_corso) {
         return corsoRepository.findById(id_corso)
-                .map(corsoMapper::toDto)
+                .map(this::convertToDto)
                 .orElse(null);
     }
 
@@ -42,7 +43,7 @@ public class CorsoService {
         }
         Corso corso = corsoMapper.toEntity(corsoDTO);
         corso = corsoRepository.save(corso);
-        return corsoMapper.toDto(corso);
+        return convertToDto(corso);
     }
 
 
@@ -62,11 +63,24 @@ public class CorsoService {
             corso.setId_docente(corsoDTO.getId_docente());
         }
         corso = corsoRepository.save(corso);
-        return corsoMapper.toDto(corso);
+        return convertToDto(corso);
     }
 
 
     public void delete(Integer id_corso) {
         corsoRepository.deleteById(id_corso);
+    }
+
+    private CorsoDTO convertToDto(Corso corso) {
+        CorsoDTO dto = corsoMapper.toDto(corso);
+        if  (corso.getId_docente() != null) {
+            try {
+                DocenteDTO docente = docenteService.getDocenteById(corso.getId_docente());
+                dto.setDocente(docente);
+            } catch (Exception e) {
+                System.err.println("Errore: " + e.getMessage());
+            }
+        }
+        return dto;
     }
 }
