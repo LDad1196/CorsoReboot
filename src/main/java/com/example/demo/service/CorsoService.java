@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CorsoService {
@@ -17,7 +16,10 @@ public class CorsoService {
     CorsoRepository corsoRepository;
 
     @Autowired
-    private CorsoMapper corsoMapper;
+    CorsoMapper corsoMapper;
+
+    @Autowired
+    DocenteService docenteService;
 
     public List<CorsoDTO> findAll() {
         return corsoRepository.findAll()
@@ -33,6 +35,11 @@ public class CorsoService {
     }
 
     public CorsoDTO save(CorsoDTO corsoDTO) {
+        if (corsoDTO.getId_docente() != null) {
+            if (!docenteService.docenteExists(corsoDTO.getId_docente())) {
+                throw new IllegalArgumentException("Docente non trovato");
+            }
+        }
         Corso corso = corsoMapper.toEntity(corsoDTO);
         corso = corsoRepository.save(corso);
         return corsoMapper.toDto(corso);
@@ -47,6 +54,12 @@ public class CorsoService {
         }
         if (corsoDTO.getAnno_accademico() != null) {
             corso.setAnno_accademico(corsoDTO.getAnno_accademico());
+        }
+        if (corsoDTO.getId_docente() != null) {
+            if (!docenteService.docenteExists(corsoDTO.getId_docente())) {
+                throw new IllegalArgumentException("Docente non trovato");
+            }
+            corso.setId_docente(corsoDTO.getId_docente());
         }
         corso = corsoRepository.save(corso);
         return corsoMapper.toDto(corso);

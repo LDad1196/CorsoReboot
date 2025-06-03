@@ -17,6 +17,9 @@ public class Corso {
     @Column(name = "anno_accademico")
     private String anno_accademico;
 
+    @Column(name = "id_docente")
+    private Integer id_docente;
+
     public Corso() {}
 
     public Corso(String nome, String anno_accademico) {
@@ -48,4 +51,11 @@ public class Corso {
         return anno_accademico;
     }
 
+    public void setId_docente(Integer id_docente) {
+        this.id_docente = id_docente;
+    }
+
+    public Integer getId_docente() {
+        return id_docente;
+    }
 }
