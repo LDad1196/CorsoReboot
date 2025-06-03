@@ -13,3 +13,19 @@ spring:
       ddl-auto: update
     show-sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 10000
+        loggerLevel: basic
+      docente-service:
+        connectTimeout: 3000
+        readTimeout: 8000
+        loggerLevel: full
+
+# Logging per vedere le chiamate Feign
+logging:
+  level:
+    com.example.demo.converter.DocenteClient: DEBUG
