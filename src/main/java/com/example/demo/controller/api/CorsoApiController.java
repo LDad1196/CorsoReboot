@@ -40,4 +40,11 @@ public class CorsoApiController {
         corsoService.delete(id_corso);
     }
 
+    @PostMapping("/{id_corso}/discenti/{id_discente}")
+    public CorsoDTO iscriviDiscente(@PathVariable("id_corso") Integer id_corso,
+                                    @PathVariable("id_discente") Integer id_discente) {
+        return corsoService.iscriviDiscente(id_corso, id_discente);
+    }
+
+
 }

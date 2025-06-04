@@ -1,5 +1,7 @@
 package com.example.demo.data.DTO;
 
+import java.util.List;
+
 public class CorsoDTO {
 
     private String nome;
@@ -9,6 +11,10 @@ public class CorsoDTO {
     private Integer id_docente;
 
     private DocenteDTO docente;
+
+    private List<DiscenteDTO> discenti;
+
+    private Integer numero_discenti;
 
     public String getAnno_accademico() {
         return anno_accademico;
@@ -40,5 +46,21 @@ public class CorsoDTO {
 
     public void setDocente(DocenteDTO docente) {
         this.docente = docente;
+    }
+
+    public List<DiscenteDTO> getDiscenti() {
+        return discenti;
+    }
+
+    public void setDiscenti(List<DiscenteDTO> discenti) {
+        this.discenti = discenti;
+    }
+
+    public Integer getNumero_discenti() {
+        return numero_discenti;
+    }
+
+    public void setNumero_discenti(Integer numero_discenti) {
+        this.numero_discenti = numero_discenti;
     }
 }

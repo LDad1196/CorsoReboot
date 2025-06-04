@@ -3,13 +3,13 @@ package com.example.demo.service;
 import com.example.demo.converter.CorsoMapper;
 import com.example.demo.data.DTO.CorsoDTO;
 import com.example.demo.data.DTO.DocenteDTO;
+import com.example.demo.data.DTO.DiscenteDTO;
 import com.example.demo.data.entity.Corso;
 import com.example.demo.repository.CorsoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class CorsoService {
@@ -22,6 +22,9 @@ public class CorsoService {
 
     @Autowired
     DocenteService docenteService;
+
+    @Autowired
+    Corsi_discentiService corsi_discentiService;
 
     public List<CorsoDTO> findAll() {
         return corsoRepository.findAll()
@@ -46,7 +49,6 @@ public class CorsoService {
         corso = corsoRepository.save(corso);
         return convertToDto(corso);
     }
-
 
     public CorsoDTO update(Integer id_corso, CorsoDTO corsoDTO) {
         Corso corso = corsoRepository.findById(id_corso)
@@ -83,7 +85,28 @@ public class CorsoService {
                 System.err.println("Errore: " + e.getMessage());
             }
         }
+        if (corso.getId_corso() != null) {
+            try {
+                List<DiscenteDTO> discenti = corsi_discentiService.getDiscentiByCourseId(corso.getId_corso());
+                dto.setDiscenti(discenti);
+                dto.setNumero_discenti(discenti.size());
+            } catch (Exception e) {
+                System.err.println("Errore recupero discenti: " + e.getMessage());
+                dto.setDiscenti(List.of());
+                dto.setNumero_discenti(0);
+            }
+        }
         return dto;
     }
+
+    public CorsoDTO iscriviDiscente(Integer id_corso, Integer id_discente) {
+        // Verifica che il corso esista
+        if (!corsoRepository.existsById(id_corso)) {
+            throw new IllegalArgumentException("Corso non trovato con ID: " + id_corso);
+        }
+        corsi_discentiService.iscriviDiscente(id_corso, id_discente);
+        return findById(id_corso);
+    }
+
 
 }
