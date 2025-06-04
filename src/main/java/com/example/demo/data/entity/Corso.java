@@ -17,6 +17,16 @@ public class Corso {
     @Column(name = "anno_accademico")
     private String anno_accademico;
 
+    private Integer id_docente;
+
+    public Integer getId_docente() {
+        return id_docente;
+    }
+
+    public void setId_docente(Integer id_docente) {
+        this.id_docente = id_docente;
+    }
+
     public Corso() {}
 
     public Corso(String nome, String anno_accademico) {
