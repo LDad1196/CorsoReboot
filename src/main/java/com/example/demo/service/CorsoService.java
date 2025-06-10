@@ -26,6 +26,9 @@ public class CorsoService {
     @Autowired
     Corsi_discentiService corsi_discentiService;
 
+    @Autowired
+    DiscenteService discenteService;
+
     public List<CorsoDTO> findAll() {
         return corsoRepository.findAll()
                 .stream()
@@ -48,6 +51,19 @@ public class CorsoService {
         Corso corso = corsoMapper.toEntity(corsoDTO);
         corso = corsoRepository.save(corso);
         return convertToDto(corso);
+    }
+
+    public CorsoDTO saveConNomi(CorsoDTO corsoDTO) {
+        if (corsoDTO.getNomeDocente() != null && corsoDTO.getCognomeDocente() != null) {
+            DocenteDTO docente = docenteService.getOrCreateDocente(
+                    corsoDTO.getNomeDocente(),
+                    corsoDTO.getCognomeDocente()
+            );
+            if (docente != null && docente.getId_docente() != null) {
+                corsoDTO.setId_docente(docente.getId_docente());
+            }
+        }
+        return save(corsoDTO);
     }
 
     public CorsoDTO update(Integer id_corso, CorsoDTO corsoDTO) {
@@ -100,9 +116,11 @@ public class CorsoService {
     }
 
     public CorsoDTO iscriviDiscente(Integer id_corso, Integer id_discente) {
-        // Verifica che il corso esista
         if (!corsoRepository.existsById(id_corso)) {
             throw new IllegalArgumentException("Corso non trovato con ID: " + id_corso);
+        }
+        if (!discenteService.discenteExists(id_discente)) {
+            throw new IllegalArgumentException("Discente non trovato con ID: " + id_discente);
         }
         corsi_discentiService.iscriviDiscente(id_corso, id_discente);
         return findById(id_corso);

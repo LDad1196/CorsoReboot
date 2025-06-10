@@ -21,6 +21,14 @@ public class DiscenteService {
                 .block();
     }
 
+    public DiscenteDTO getDiscenteByNomeAndCognome(String nome, String cognome) {
+        return webClient.webClient().get()
+                .uri("/discenti?nome={nome}&cognome={cognome}", nome, cognome)
+                .retrieve()
+                .bodyToMono(DiscenteDTO.class)
+                .block();
+    }
+
     public boolean discenteExists(Integer id_discente) {
         DiscenteDTO discente = getDiscenteById(id_discente);
         return discente != null;

@@ -24,7 +24,7 @@ public class CorsoApiController {
 
     @PostMapping
     public CorsoDTO create(@RequestBody CorsoDTO corso) {
-        return (CorsoDTO) corsoService.save(corso);
+        return (CorsoDTO) corsoService.saveConNomi(corso);
     }
 
 
@@ -33,7 +33,6 @@ public class CorsoApiController {
                                    @RequestBody CorsoDTO corso) {
         return corsoService.update(id_corso, corso);
     }
-
 
     @DeleteMapping("{id_corso}")
     public void delete(@PathVariable("id_corso") Integer id_corso) {
