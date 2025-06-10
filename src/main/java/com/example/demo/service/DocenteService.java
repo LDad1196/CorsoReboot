@@ -67,25 +67,16 @@ public class DocenteService {
 
     public DocenteDTO getDocenteByNomeAndCognome(String nome, String cognome) {
         try {
-            System.out.println("=== DEBUG chiamata API esterna ===");
-            System.out.println("URL chiamata: /docenti?nome=" + nome + "&cognome=" + cognome);
-
             List<DocenteDTO> docenti = webClient.webClient().get()
                     .uri("/docenti?nome={nome}&cognome={cognome}", nome, cognome)
                     .retrieve()
                     .bodyToMono(new ParameterizedTypeReference<List<DocenteDTO>>() {})
                     .block();
 
-            System.out.println("Risposta API: " + docenti);
             if (docenti != null && !docenti.isEmpty()) {
                 DocenteDTO primo = docenti.get(0);
-                System.out.println("Primo docente trovato:");
-                System.out.println("  - Nome: " + primo.getNome());
-                System.out.println("  - Cognome: " + primo.getCognome());
-                System.out.println("  - ID: " + primo.getId_docente());
                 return primo;
             }
-
             return null;
 
         } catch (WebClientResponseException e) {

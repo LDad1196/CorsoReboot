@@ -23,6 +23,8 @@ public class CorsoDTO {
 
     private Integer numero_discenti;
 
+    private List<DiscenteDTO> nuoviDiscenti;
+
     public String getAnno_accademico() { return anno_accademico; }
 
     public void setAnno_accademico(String anno_accademico) { this.anno_accademico = anno_accademico; }
@@ -54,5 +56,9 @@ public class CorsoDTO {
     public Integer getNumero_discenti() { return numero_discenti; }
 
     public void setNumero_discenti(Integer numero_discenti) { this.numero_discenti = numero_discenti; }
+
+    public List<DiscenteDTO> getNuoviDiscenti() { return nuoviDiscenti; }
+
+    public void setNuoviDiscenti(List<DiscenteDTO> nuoviDiscenti) { this.nuoviDiscenti = nuoviDiscenti; }
 
 }

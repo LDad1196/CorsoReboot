@@ -1,3 +1,4 @@
+
 package com.example.demo.service;
 
 import com.example.demo.converter.CorsoMapper;
@@ -42,9 +43,7 @@ public class CorsoService {
                 .orElse(null);
     }
 
-
     public CorsoDTO save(CorsoDTO corsoDTO) {
-
         // GESTIONE DOCENTE - Priorità ai nomi se presenti
         if (corsoDTO.getNomeDocente() != null && corsoDTO.getCognomeDocente() != null) {
             DocenteDTO docente = docenteService.getOrCreateDocente(
@@ -64,14 +63,21 @@ public class CorsoService {
                 throw new IllegalArgumentException("Docente non trovato con ID: " + corsoDTO.getId_docente());
             }
         }
+
         Corso corso = corsoMapper.toEntity(corsoDTO);
         corso = corsoRepository.save(corso);
+
+        if (corsoDTO.getNuoviDiscenti() != null && !corsoDTO.getNuoviDiscenti().isEmpty()) {
+            processaNuoviDiscenti(corso.getId_corso(), corsoDTO.getNuoviDiscenti());
+        }
+
         return convertToDto(corso);
     }
 
     public CorsoDTO update(Integer id_corso, CorsoDTO corsoDTO) {
         Corso corso = corsoRepository.findById(id_corso)
                 .orElseThrow(() -> new IllegalArgumentException("Corso non trovato"));
+
         // Aggiorna nome corso se presente
         if (corsoDTO.getNome() != null) {
             corso.setNome(corsoDTO.getNome());
@@ -102,10 +108,54 @@ public class CorsoService {
             }
             corso.setId_docente(corsoDTO.getId_docente());
         }
+
         corso = corsoRepository.save(corso);
+
+        if (corsoDTO.getNuoviDiscenti() != null && !corsoDTO.getNuoviDiscenti().isEmpty()) {
+
+            processaNuoviDiscenti(corso.getId_corso(), corsoDTO.getNuoviDiscenti());
+        }
+
         return convertToDto(corso);
     }
 
+    // Metodo per processare i nuovi discenti con gestione più robusta
+    private void processaNuoviDiscenti(Integer id_corso, List<DiscenteDTO> nuoviDiscenti) {
+
+        for (int i = 0; i < nuoviDiscenti.size(); i++) {
+            DiscenteDTO discenteInput = nuoviDiscenti.get(i);
+
+            if (discenteInput.getNome() != null && discenteInput.getCognome() != null) {
+                try {
+                    DiscenteDTO discente = discenteService.getOrCreateDiscente(
+                            discenteInput.getNome(),
+                            discenteInput.getCognome()
+                    );
+
+                    if (discente != null && discente.getId_discente() != null) {
+                        try {
+                            corsi_discentiService.iscriviDiscenteDiretto(id_corso, discente.getId_discente());
+                        } catch (Exception e) {
+                            System.err.println("ERRORE nell'iscrizione diretta, provo con metodo standard...");
+                            // Fallback al metodo standard
+                            corsi_discentiService.iscriviDiscente(id_corso, discente.getId_discente());
+                        }
+                    } else {
+                        System.err.println("ERRORE: Impossibile ottenere ID per il discente: " +
+                                discenteInput.getNome() + " " + discenteInput.getCognome());
+                    }
+                } catch (Exception e) {
+                    System.err.println("ERRORE nell'iscrizione del discente: " +
+                            discenteInput.getNome() + " " + discenteInput.getCognome() +
+                            " - " + e.getMessage());
+                    e.printStackTrace();
+                    // Continua con il prossimo discente invece di interrompere tutto
+                }
+            } else {
+                System.err.println("ERRORE: Nome o cognome mancanti per il discente: " + discenteInput);
+            }
+        }
+    }
 
     public void delete(Integer id_corso) {
         corsoRepository.deleteById(id_corso);
@@ -146,6 +196,4 @@ public class CorsoService {
         corsi_discentiService.iscriviDiscente(id_corso, id_discente);
         return findById(id_corso);
     }
-
-
 }
