@@ -24,7 +24,7 @@ public class CorsoApiController {
 
     @PostMapping
     public CorsoDTO create(@RequestBody CorsoDTO corso) {
-        return (CorsoDTO) corsoService.saveConNomi(corso);
+        return (CorsoDTO) corsoService.save(corso);
     }
 
 

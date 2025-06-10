@@ -42,18 +42,10 @@ public class CorsoService {
                 .orElse(null);
     }
 
-    public CorsoDTO save(CorsoDTO corsoDTO) {
-        if (corsoDTO.getId_docente() != null) {
-            if(!docenteService.docenteExists(corsoDTO.getId_docente())) {
-                throw new IllegalArgumentException("Docente non trovato");
-            }
-        }
-        Corso corso = corsoMapper.toEntity(corsoDTO);
-        corso = corsoRepository.save(corso);
-        return convertToDto(corso);
-    }
 
-    public CorsoDTO saveConNomi(CorsoDTO corsoDTO) {
+    public CorsoDTO save(CorsoDTO corsoDTO) {
+
+        // GESTIONE DOCENTE - Priorità ai nomi se presenti
         if (corsoDTO.getNomeDocente() != null && corsoDTO.getCognomeDocente() != null) {
             DocenteDTO docente = docenteService.getOrCreateDocente(
                     corsoDTO.getNomeDocente(),
@@ -61,22 +53,50 @@ public class CorsoService {
             );
             if (docente != null && docente.getId_docente() != null) {
                 corsoDTO.setId_docente(docente.getId_docente());
+            } else {
+                throw new IllegalArgumentException("Impossibile trovare o creare il docente: " +
+                        corsoDTO.getNomeDocente() + " " + corsoDTO.getCognomeDocente());
             }
         }
-        return save(corsoDTO);
+        // Se non ci sono nomi ma c'è l'ID, valida l'ID
+        else if (corsoDTO.getId_docente() != null) {
+            if (!docenteService.docenteExists(corsoDTO.getId_docente())) {
+                throw new IllegalArgumentException("Docente non trovato con ID: " + corsoDTO.getId_docente());
+            }
+        }
+        Corso corso = corsoMapper.toEntity(corsoDTO);
+        corso = corsoRepository.save(corso);
+        return convertToDto(corso);
     }
 
     public CorsoDTO update(Integer id_corso, CorsoDTO corsoDTO) {
         Corso corso = corsoRepository.findById(id_corso)
                 .orElseThrow(() -> new IllegalArgumentException("Corso non trovato"));
+        // Aggiorna nome corso se presente
         if (corsoDTO.getNome() != null) {
             corso.setNome(corsoDTO.getNome());
         }
+
+        // Aggiorna anno accademico se presente
         if (corsoDTO.getAnno_accademico() != null) {
             corso.setAnno_accademico(corsoDTO.getAnno_accademico());
         }
-        if (corsoDTO.getId_docente() != null) {
-            // Validazione docente
+
+        // GESTIONE DOCENTE - Priorità ai nomi se presenti
+        if (corsoDTO.getNomeDocente() != null && corsoDTO.getCognomeDocente() != null) {
+            DocenteDTO docente = docenteService.getOrCreateDocente(
+                    corsoDTO.getNomeDocente(),
+                    corsoDTO.getCognomeDocente()
+            );
+            if (docente != null && docente.getId_docente() != null) {
+                corso.setId_docente(docente.getId_docente());
+            } else {
+                throw new IllegalArgumentException("Impossibile trovare o creare il docente: " +
+                        corsoDTO.getNomeDocente() + " " + corsoDTO.getCognomeDocente());
+            }
+        }
+        // Se non ci sono nomi, usa l'ID se presente
+        else if (corsoDTO.getId_docente() != null) {
             if (!docenteService.docenteExists(corsoDTO.getId_docente())) {
                 throw new IllegalArgumentException("Docente non trovato con ID: " + corsoDTO.getId_docente());
             }
@@ -85,6 +105,7 @@ public class CorsoService {
         corso = corsoRepository.save(corso);
         return convertToDto(corso);
     }
+
 
     public void delete(Integer id_corso) {
         corsoRepository.deleteById(id_corso);

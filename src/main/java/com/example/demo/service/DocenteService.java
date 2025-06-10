@@ -105,11 +105,6 @@ public class DocenteService {
     }
 
 
-    public boolean docenteExistsNome(String nome, String cognome) {
-        DocenteDTO docente = getDocenteByNomeAndCognome(nome, cognome);
-        return docente != null;
-    }
-
     public boolean docenteExists(Integer id_docente) {
         DocenteDTO docente = getDocenteById(id_docente);
         return docente != null;
