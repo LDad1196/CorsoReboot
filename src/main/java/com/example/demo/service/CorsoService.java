@@ -5,10 +5,14 @@ import com.example.demo.converter.CorsoMapper;
 import com.example.demo.data.DTO.CorsoDTO;
 import com.example.demo.data.DTO.DocenteDTO;
 import com.example.demo.data.DTO.DiscenteDTO;
+import com.example.demo.data.DTO.UserDTO;
 import com.example.demo.data.entity.Corso;
 import com.example.demo.repository.CorsoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.*;
 
@@ -29,6 +33,10 @@ public class CorsoService {
 
     @Autowired
     DiscenteService discenteService;
+
+    @Autowired
+    @Qualifier("utentiWebClient")
+    WebClient utentiWebClient;
 
     public List<CorsoDTO> findAll() {
         return corsoRepository.findAll()
@@ -196,4 +204,42 @@ public class CorsoService {
         corsi_discentiService.iscriviDiscente(id_corso, id_discente);
         return findById(id_corso);
     }
+
+
+    public UserDTO getUserInfoByUsername(String username) {
+        try {
+            return utentiWebClient.get()
+                    .uri("/users/by-username/{username}", username)
+                    .retrieve()
+                    .bodyToMono(UserDTO.class)
+                    .block();
+        } catch (WebClientResponseException ex) {
+            System.err.println("Errore HTTP: " + ex.getStatusCode());
+            System.err.println("Corpo risposta: " + ex.getResponseBodyAsString());
+            throw new SecurityException("Utente non trovato");
+        }
+    }
+
+    public void checkAuthorization(String username, boolean scritturaRichiesta) {
+        UserDTO user = getUserInfoByUsername(username);
+
+        if (user == null) {
+            throw new SecurityException("Utente non trovato");
+        }
+
+        System.out.println("Utente trovato: " + user.getUsername() + ", ruolo: " + user.getRole());
+        String role = user.getRole().toUpperCase();
+
+        if ("ADMIN".equals(role)) return;
+
+        if ("USER".equals(role) && scritturaRichiesta) {
+            throw new SecurityException("Lo USER può solo visualizzare");
+        }
+
+        if (!"USER".equals(role) && !"ADMIN".equals(role)) {
+            throw new SecurityException("Ruolo non autorizzato: " + role);
+        }
+    }
+
+
 }
