@@ -1,8 +1,11 @@
 server:
   port: 8081
+
+jwt:
+  secret-key: myVeryLongSecretKeyThatIsAtLeast32Characters!
+  expiration: 86400
+
 spring:
-  application:
-    name: demo
   datasource:
     url: jdbc:postgresql://localhost:5432/corso
     username: postgres
